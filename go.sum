@@ -1,0 +1,4 @@
+github.com/vbsw/g2d v0.0.0-20220623154316-6a748ac8ee8f h1:xIlbQoFHVNzv1cOx6KCJVoMtpS3ZVZgRIFdN/8QqLvM=
+github.com/vbsw/g2d v0.0.0-20220623154316-6a748ac8ee8f/go.mod h1:1C/VQBWUOs02KKPJmfLTbiVJhpEIxeVjnPdskQUnq0o=
+github.com/vbsw/golib/osargs v1.0.0 h1:cTp5ErrdDymRopZTsEG1AZ6wt6jPjL5VgLwobIhC/HI=
+github.com/vbsw/golib/osargs v1.0.0/go.mod h1:srWWEFAGR8t5Z+1kjPxBDim6xgTEHCTnGFS8M0C6mi8=
