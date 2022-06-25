@@ -11,10 +11,10 @@ import (
 	"github.com/vbsw/golib/osargs"
 )
 
-type parameters struct {
+type tParameters struct {
 }
 
-func (params *parameters) parseOSArgs() (bool, error) {
+func (params *tParameters) parseOSArgs() (bool, error) {
 	args := osargs.New()
 	infoOnly := len(args.Values) > 0
 	return infoOnly, nil

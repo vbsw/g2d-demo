@@ -14,25 +14,25 @@ import (
 )
 
 func main() {
-	g2d.Start(new(DemoEngine))
+	var params tParameters
+	infoOnly, err := params.parseOSArgs()
+	if err == nil {
+		if !infoOnly {
+			g2d.Init(nil)
+			g2d.Show(newDemoWindow(&params))
+			g2d.ProcessEvents()
+		} else {
+			printInfo(&params)
+		}
+	}
+	if err == nil {
+		err = g2d.Err
+	}
+	if err != nil {
+		fmt.Println("error:", err.Error())
+	}
 }
 
-type DemoEngine struct {
-	g2d.Engine
-	params parameters
-}
-
-func (demo *DemoEngine) ParseOSArgs() error {
-	infoOnly, err := demo.params.parseOSArgs()
-	demo.SetInfoOnly(infoOnly)
-	return err
-}
-
-func (demo *DemoEngine) Info() {
+func printInfo(params *tParameters) {
 	fmt.Println("...parameters not implemented, yet")
-}
-
-func (demo *DemoEngine) CreateWindow() {
-	var builder demoWindowBuilder
-	builder.CreateWindow()
 }

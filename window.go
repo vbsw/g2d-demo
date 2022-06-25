@@ -11,21 +11,17 @@ import (
 	"github.com/vbsw/g2d"
 )
 
-type demoWindowBuilder struct {
-	g2d.WindowBuilder
+type tDemoWindow struct {
+	g2d.Window
+	params *tParameters
 }
 
-type demoWindow struct {
+func newDemoWindow(params *tParameters) *tDemoWindow {
+	window := new(tDemoWindow)
+	window.params = params
+	return window
 }
 
-func (builder *demoWindowBuilder) CreateWindow() {
-	builder.ClientWidth = 640
-	builder.ClientHeight = 480
-	builder.Resizable = true
-	builder.Centered = true
-	builder.Handler = new(demoWindow)
-	builder.WindowBuilder.CreateWindow()
-}
-
-func (window *demoWindow) foo() {
+func (window *tDemoWindow) Close() (bool, error) {
+	return true, nil
 }
