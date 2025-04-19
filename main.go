@@ -1,38 +1,84 @@
 /*
- *          Copyright 2022, Vitali Baumtrok.
+ *          Copyright 2025, Vitali Baumtrok.
  * Distributed under the Boost Software License, Version 1.0.
  *     (See accompanying file LICENSE or copy at
  *        http://www.boost.org/LICENSE_1_0.txt)
  */
 
-// Package main tests and demonstrates basic idea of using g2d.
+// Package main. This is g2d demo.
 package main
 
 import (
+	"embed"
 	"fmt"
 	"github.com/vbsw/g2d"
+	"image"
+	"image/png"
+	"math/rand"
+	"runtime"
+	"time"
 )
 
-func main() {
-	var params tParameters
-	infoOnly, err := params.parseOSArgs()
-	if err == nil {
-		if !infoOnly {
-			g2d.Init(nil)
-			g2d.Show(newDemoWindow(&params))
-			g2d.ProcessEvents()
-		} else {
-			printInfo(&params)
-		}
-	}
-	if err == nil {
-		err = g2d.Err
-	}
-	if err != nil {
-		fmt.Println("error:", err.Error())
-	}
+const (
+	padding = 3
+	speed   = 0.09
+)
+
+var (
+	//go:embed *.png
+	fs            embed.FS
+	windowCounter int
+	imgNames      []string
+	imgWidths     []int
+	imgHeights    []int
+	imgIncX       []float32
+	imgIncY       []float32
+	random        *rand.Rand
+	scale         float32
+)
+
+func init() {
+	// run main on main thread.
+	runtime.LockOSThread()
+	imgNames = []string{"chibi0.png", "chibi1.png", "chibi2.png", "chibi3.png", "chibi4.png"}
+	imgWidths = []int{512, 399, 400, 347, 418}
+	imgHeights = []int{443, 512, 512, 512, 512}
+	imgIncX = []float32{1.0, 399.0 / 512.0, 400.0 / 512.0, 347.0 / 512.0, 418.0 / 512.0}
+	imgIncY = []float32{443.0 / 512.0, 1.0, 1.0, 1.0, 1.0}
+	random = rand.New(rand.NewSource(time.Now().UnixNano()))
+	scale = 0.125
 }
 
-func printInfo(params *tParameters) {
-	fmt.Println("...parameters not implemented, yet")
+func imageFromEmbededPNG(fileName string) (image.Image, error) {
+	file, err := fs.Open(fileName)
+	if err == nil {
+		defer file.Close()
+		return png.Decode(file)
+	}
+	return nil, err
+}
+
+func printUsage() {
+	fmt.Println("CONTROLS")
+	fmt.Println("  1 - 5     spawn 1, 10, 100, 1000, 10000 entities")
+	fmt.Println("  q, w      de-/increment size of entities by 1 pixel")
+	fmt.Println("  a, s      de-/increment size of entities by half/twice")
+	fmt.Println("  k, l      de-/increment movement speed of entities")
+	fmt.Println("  o         set original size")
+	fmt.Println("  r         toggle rotation")
+	fmt.Println("  m         toggle movement")
+	fmt.Println("  j         toggle mipmap")
+	fmt.Println("  v         toggle vsync")
+	fmt.Println("  i         print stats (UPS, FPS, ...)")
+	fmt.Println("  c         clear screen")
+	fmt.Println("  f         fullscreen")
+	fmt.Println("")
+}
+
+func main() {
+	g2d.Init()
+	g2d.MainLoop(newDemoWindow())
+	if g2d.Err != nil {
+		fmt.Println("error:", g2d.Err.Error())
+	}
 }
