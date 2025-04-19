@@ -22,12 +22,12 @@ type demoWindow struct {
 	entities     []*g2d.Rectangle
 	entImgIdxs   []int
 	counter      int
-	rotating        bool
+	rotating     bool
 	rotSpeed     []float32
-	moving        bool
+	moving       bool
 	movX, movY   []float32
 	incX, incY   float32
-	mipMapOn     bool
+	mipMapOn     int
 }
 
 func newDemoWindow() *demoWindow {
@@ -73,7 +73,7 @@ func (wnd *demoWindow) OnShow() error {
 }
 
 func (wnd *demoWindow) OnTextureLoaded(texture g2d.Texture) error {
-	if texture.Id() < len(imgNames) {
+	if texture.Id() < len(imgNames)*2 {
 		// load as a mipmap
 		// (normaly you wouldn't load a texture twice; this for tests, only)
 		wnd.Gfx.LoadTexture(texture)
@@ -94,14 +94,14 @@ func (wnd *demoWindow) OnUpdate() error {
 		}
 		if wnd.moving {
 			if rect.X < padding && wnd.movX[i] < 0 {
-				wnd.movX[i] = -1*wnd.movX[i]
+				wnd.movX[i] = -1 * wnd.movX[i]
 			} else if rect.X > float32(wnd.Props.ClientWidth)-(rect.Width+padding) && wnd.movX[i] > 0 {
-				wnd.movX[i] = -1*wnd.movX[i]
+				wnd.movX[i] = -1 * wnd.movX[i]
 			}
 			if rect.Y < padding && wnd.movY[i] < 0 {
-				wnd.movY[i] = -1*wnd.movY[i]
+				wnd.movY[i] = -1 * wnd.movY[i]
 			} else if rect.Y > float32(wnd.Props.ClientHeight)-(rect.Height+padding) && wnd.movY[i] > 0 {
-				wnd.movY[i] = -1*wnd.movY[i]
+				wnd.movY[i] = -1 * wnd.movY[i]
 			}
 			rect.X, rect.Y = wnd.movX[i]*float32(wnd.Stats.DeltaTime)*speed+rect.X, wnd.movY[i]*float32(wnd.Stats.DeltaTime)*speed+rect.Y
 		}
@@ -124,7 +124,7 @@ func (wnd *demoWindow) OnResize() error {
 	clW, clH := float32(wnd.Props.ClientWidth), float32(wnd.Props.ClientHeight)
 	// speed up moving (when out of screen)
 	for i, rect := range wnd.entities {
-		if rect.X + rect.Width > clW {
+		if rect.X+rect.Width > clW {
 			movXAbs, signX := wnd.movX[i], float32(1.0)
 			if movXAbs < 0 {
 				signX = -1.0
@@ -137,7 +137,7 @@ func (wnd *demoWindow) OnResize() error {
 				wnd.movX[i] = movXAbs * signX
 			}
 		}
-		if rect.Y + rect.Height > clH {
+		if rect.Y+rect.Height > clH {
 			movYAbs, signY := wnd.movY[i], float32(1.0)
 			if movYAbs < 0 {
 				signY = -1.0
@@ -233,16 +233,11 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 		} else if keyCode == 12 { // I
 			fmt.Println(wnd.Stats.FPS, "FPS  ", wnd.Stats.UPS, "UPS  ", wnd.counter, "entities")
 		} else if keyCode == 13 { // J
-			wnd.mipMapOn = !wnd.mipMapOn
 			texCount := len(imgNames)
-			if wnd.mipMapOn {
-				for _, rect := range wnd.entities {
-					rect.TexRef += texCount
-				}
-			} else {
-				for _, rect := range wnd.entities {
-					rect.TexRef -= texCount
-				}
+			wnd.mipMapOn = (wnd.mipMapOn + 1) % 3
+			texOffset := texCount * wnd.mipMapOn
+			for i := 0; i < texCount; i++ {
+				wnd.layer0.UseTexture(i, i+texOffset)
 			}
 		} else if keyCode == 16 { // M
 			if len(wnd.entities) > 0 {
@@ -277,7 +272,6 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 func (wnd *demoWindow) spawn(n int) {
 	clW, clH := float32(wnd.Props.ClientWidth), float32(wnd.Props.ClientHeight)
 	firstUpdate := bool(len(wnd.entities) == 0)
-	texCount := len(imgNames)
 	for i := 0; i < n; i++ {
 		rndA, rndB, rndC, rndD := random.Float32(), random.Float32(), random.Float32(), random.Float32()
 		imgIndex := int(rndA * 5)
@@ -288,19 +282,16 @@ func (wnd *demoWindow) spawn(n int) {
 		rect := wnd.layer0.NewEntity()
 		rect.X, rect.Y, rect.Width, rect.Height = rndB*(clW-rectW-2*padding)+padding, rndC*(clH-rectH-2*padding)+padding, rectW, rectH
 		rect.TexRef, rect.TexX, rect.TexY, rect.TexWidth, rect.TexHeight = imgIndex, 0, 0, imgW, imgH
-		if wnd.mipMapOn {
-			rect.TexRef += texCount
-		}
 		rect.RotX, rect.RotY = rect.Width/2, rect.Height/2
 		if random.Float32() < 0.5 {
-			wnd.movX = append(wnd.movX, random.Float32()*0.5+0.3)
+			wnd.movX = append(wnd.movX, random.Float32()*0.5+0.15)
 		} else {
-			wnd.movX = append(wnd.movX, -random.Float32()*0.5+0.3)
+			wnd.movX = append(wnd.movX, -random.Float32()*0.5-0.15)
 		}
 		if random.Float32() < 0.5 {
-			wnd.movY = append(wnd.movY, random.Float32()*0.5+0.3)
+			wnd.movY = append(wnd.movY, random.Float32()*0.5+0.15)
 		} else {
-			wnd.movY = append(wnd.movY, -random.Float32()*0.5+0.3)
+			wnd.movY = append(wnd.movY, -random.Float32()*0.5-0.15)
 		}
 		wnd.entities = append(wnd.entities, rect)
 		wnd.entImgIdxs = append(wnd.entImgIdxs, imgIndex)

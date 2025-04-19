@@ -19,8 +19,11 @@ On Windows to compile without console use:
 	o         set original size
 	r         toggle rotation
 	m         toggle movement
-	j         toggle mipmap
+	j         toggle mipmaps
 	v         toggle vsync
+	p         toggle picture-in-picture (offscreen buffer, only)
+	b         toggle offscreen buffer
+	t         toggle anti-aliasing (offscreen buffer, only)
 	i         print stats (UPS, FPS, ...)
 	c         clear screen
 	f         fullscreen
