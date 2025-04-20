@@ -35,6 +35,8 @@ var (
 	imgIncY       []float32
 	random        *rand.Rand
 	scale         float32
+	infoCount     int
+	currWnd       int
 )
 
 func init() {
@@ -47,6 +49,7 @@ func init() {
 	imgIncY = []float32{443.0 / 512.0, 1.0, 1.0, 1.0, 1.0}
 	random = rand.New(rand.NewSource(time.Now().UnixNano()))
 	scale = 0.125
+	currWnd = -1
 }
 
 func imageFromEmbededPNG(fileName string) (image.Image, error) {
@@ -67,15 +70,15 @@ func printUsage() {
 	fmt.Println("  o         set original size")
 	fmt.Println("  r         toggle rotation")
 	fmt.Println("  m         toggle movement")
-	fmt.Println("  j         toggle mipmaps")
+	fmt.Println("  j         switch between no, auto and custom mipmaps")
 	fmt.Println("  v         toggle vsync")
-	fmt.Println("  p         toggle picture-in-picture (offscreen buffer, only)")
-	fmt.Println("  b         toggle offscreen buffer")
+	fmt.Println("  b         toggle window borders on/off")
+	fmt.Println("  d         toggle window dragable on/off")
 	fmt.Println("  t         toggle anti-aliasing (offscreen buffer, only)")
 	fmt.Println("  i         print stats (UPS, FPS, ...)")
 	fmt.Println("  c         clear screen")
 	fmt.Println("  f         fullscreen")
-	fmt.Println("")
+	fmt.Println("  h         show new window")
 }
 
 func main() {

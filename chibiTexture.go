@@ -12,37 +12,33 @@ import (
 	"image"
 )
 
-type textureLoader struct {
+type chibiTexture struct {
 	fileName string
 	id       int
 	width    int
 	height   int
 	bytes    []byte
-	passes   int
+	pass     int
 }
 
-func newTextureLoader(id int, fileName string) *textureLoader {
-	texture := new(textureLoader)
+func newChibiTexture(id int, fileName string) *chibiTexture {
+	texture := new(chibiTexture)
 	texture.id = id
 	texture.fileName = fileName
 	return texture
 }
 
-func (texture *textureLoader) RGBABytes() ([]byte, error) {
-	var img image.Image
+func (texture *chibiTexture) RGBABytes() ([]byte, error) {
 	var err error
-	if texture.passes == 0 {
+	if texture.pass == 0 {
+		var img image.Image
 		img, err = imageFromEmbededPNG(texture.fileName)
 		if err == nil {
+			var mipMapFileName string
+			mipMapIndex := texture.id
 			texture.width = img.Bounds().Max.X - img.Bounds().Min.X
 			texture.height = img.Bounds().Max.Y - img.Bounds().Min.Y
 			texture.bytes = g2d.BytesFromImage(img)
-		}
-	} else {
-		texture.id += len(imgNames)
-		if texture.passes == 2 {
-			var mipMapFileName string
-			mipMapIndex := texture.id % len(imgNames)
 			if mipMapIndex < 3 {
 				mipMapFileName = "mipmap0.png"
 			} else {
@@ -75,23 +71,29 @@ func (texture *textureLoader) RGBABytes() ([]byte, error) {
 				}
 			}
 		}
+	} else {
+		texture.id += len(imgNames)
 	}
-	texture.passes++
+	texture.pass++
 	return texture.bytes, err
 }
 
-func (texture *textureLoader) Id() int {
+func (texture *chibiTexture) Id() int {
 	return texture.id
 }
 
-func (texture *textureLoader) Dimensions() (int, int) {
+func (texture *chibiTexture) Dimensions() (int, int) {
 	return texture.width, texture.height
 }
 
-func (texture *textureLoader) GenMipMap() bool {
-	return texture.passes == 2
+func (texture *chibiTexture) GenMipMap() bool {
+	return texture.pass == 2
 }
 
-func (texture *textureLoader) IsMipMap() bool {
-	return texture.passes > 1
+func (texture *chibiTexture) IsMipMap() bool {
+	return texture.pass > 1
+}
+
+func (texture *chibiTexture) FilterLinear() bool {
+	return true
 }

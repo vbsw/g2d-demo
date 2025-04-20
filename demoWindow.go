@@ -28,16 +28,15 @@ type demoWindow struct {
 	movX, movY   []float32
 	incX, incY   float32
 	mipMapOn     int
+	showRects    bool
+	entFirstMov  bool
+	shiftDown    bool
 }
 
 func newDemoWindow() *demoWindow {
 	wnd := new(demoWindow)
 	wnd.id = windowCounter
-	if wnd.id == 0 {
-		wnd.title = "g2d Demo"
-	} else {
-		wnd.title = fmt.Sprintf("g2d Demo #%i", wnd.id)
-	}
+	wnd.title = fmt.Sprintf("g2d Demo - %d", wnd.id)
 	wnd.clientWidth = 1024
 	wnd.clientHeight = 768
 	windowCounter++
@@ -57,7 +56,7 @@ func (wnd *demoWindow) OnConfig(config *g2d.Configuration) error {
 func (wnd *demoWindow) OnCreate() error {
 	wnd.Gfx.VSync = true
 	for i := range imgNames {
-		wnd.Gfx.LoadTexture(newTextureLoader(i, imgNames[i]))
+		wnd.Gfx.LoadTexture(newChibiTexture(i, imgNames[i]))
 	}
 	return nil
 }
@@ -75,14 +74,19 @@ func (wnd *demoWindow) OnShow() error {
 func (wnd *demoWindow) OnTextureLoaded(texture g2d.Texture) error {
 	if texture.Id() < len(imgNames)*2 {
 		// load as a mipmap
-		// (normaly you wouldn't load a texture twice; this for tests, only)
+		// (normaly you wouldn't load a texture twice; this is for tests, only)
 		wnd.Gfx.LoadTexture(texture)
 	}
-	wnd.layer0.UseTexture(texture.Id(), texture.Id())
+	if texture.Id() < len(imgNames) {
+		wnd.layer0.UseTexture(texture.Id(), texture.Id())
+	}
 	return nil
 }
 
 func (wnd *demoWindow) OnUpdate() error {
+	if wnd.entFirstMov {
+		wnd.Stats.DeltaTime = 0
+	}
 	for i, rect := range wnd.entities {
 		if wnd.rotating {
 			rotSpeed := wnd.rotSpeed[i]
@@ -105,16 +109,9 @@ func (wnd *demoWindow) OnUpdate() error {
 			}
 			rect.X, rect.Y = wnd.movX[i]*float32(wnd.Stats.DeltaTime)*speed+rect.X, wnd.movY[i]*float32(wnd.Stats.DeltaTime)*speed+rect.Y
 		}
-		if wnd.rotating {
-			rotSpeed := wnd.rotSpeed[i]
-			alpha := rect.RotAlpha + float32(wnd.Stats.DeltaTime)*rotSpeed
-			for alpha > 360 {
-				alpha -= 360
-			}
-			rect.RotAlpha = alpha
-		}
 	}
 	if len(wnd.entities) > 0 {
+		wnd.entFirstMov = false
 		wnd.Update()
 	}
 	return nil
@@ -200,7 +197,11 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 	} else if keyCode == 34 { // 5
 		wnd.spawn(10000)
 	} else if repeated == 0 {
-		if keyCode == 4 { // A
+		if keyCode == 5 { // B
+			wnd.Props.Borderless = !wnd.Props.Borderless
+		} else if keyCode == 7 { // D
+			wnd.Props.Dragable = !wnd.Props.Dragable
+		} else if keyCode == 4 { // A
 			scale /= 2
 			for i, rect := range wnd.entities {
 				imgIndex := wnd.entImgIdxs[i]
@@ -228,10 +229,49 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 			wnd.movX = wnd.movX[:0]
 			wnd.movY = wnd.movY[:0]
 			wnd.counter = 0
+			wnd.Stats.FPS, wnd.Stats.UPS = 0, 0
 		} else if keyCode == 9 { // F
 			wnd.Props.Fullscreen = !wnd.Props.Fullscreen
+		} else if keyCode == 10 { // G
+			wnd.showRects = !wnd.showRects
+			if wnd.showRects {
+				for _, rect := range wnd.entities {
+					rect.TexRef = -1
+				}
+			} else {
+				for i, rect := range wnd.entities {
+					rect.TexRef = wnd.entImgIdxs[i]
+				}
+			}
+		} else if keyCode == 11 { // H
+			wnd.Show(newDemoWindow())
 		} else if keyCode == 12 { // I
-			fmt.Println(wnd.Stats.FPS, "FPS  ", wnd.Stats.UPS, "UPS  ", wnd.counter, "entities")
+			if wnd.shiftDown {
+				fmt.Println("")
+				fmt.Println("------ Video Card ------")
+				fmt.Println(fmt.Sprintf("%-6d MaxTexSize", g2d.MaxTexSize))
+				fmt.Println(fmt.Sprintf("%-6d MaxTexUnits", g2d.MaxTexUnits))
+				fmt.Println(fmt.Sprintf("%-6d MaxTextures", g2d.MaxTextures))
+				fmt.Println(fmt.Sprintf("%-6t V-Sync", g2d.VSyncAvailable))
+				fmt.Println(fmt.Sprintf("%-6t AV-Sync", g2d.AVSyncAvailable))
+				currWnd = -1
+				infoCount = 0
+			} else {
+				if len(wnd.entities) == 0 {
+					wnd.Stats.FPS, wnd.Stats.UPS = 0, 0
+				}
+				if currWnd != wnd.id {
+					currWnd = wnd.id
+					fmt.Println("")
+					fmt.Println(fmt.Sprintf("------ window %d ------", wnd.id))
+					fmt.Println("FPS    UPS       entities")
+				} else if infoCount%10 == 0 {
+					fmt.Println("")
+					fmt.Println("FPS    UPS       entities")
+				}
+				fmt.Println(fmt.Sprintf("%-4d   %-7d   %-8d", wnd.Stats.FPS, wnd.Stats.UPS, wnd.counter))
+				infoCount++
+			}
 		} else if keyCode == 13 { // J
 			texCount := len(imgNames)
 			wnd.mipMapOn = (wnd.mipMapOn + 1) % 3
@@ -262,6 +302,8 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 			wnd.Gfx.VSync = !wnd.Gfx.VSync
 		} else if keyCode == 41 { // ESC
 			wnd.Close()
+		} else if keyCode == 225 { // SHIFT
+			wnd.shiftDown = true
 		} else {
 			println("key", keyCode)
 		}
@@ -269,18 +311,26 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 	return nil
 }
 
+func (wnd *demoWindow) OnKeyUp(keyCode int) error {
+	if keyCode == 225 { // SHIFT
+		wnd.shiftDown = false
+	}
+	return nil
+}
+
 func (wnd *demoWindow) spawn(n int) {
 	clW, clH := float32(wnd.Props.ClientWidth), float32(wnd.Props.ClientHeight)
-	firstUpdate := bool(len(wnd.entities) == 0)
+	wnd.entFirstMov = len(wnd.entities) == 0
 	for i := 0; i < n; i++ {
-		rndA, rndB, rndC, rndD := random.Float32(), random.Float32(), random.Float32(), random.Float32()
-		imgIndex := int(rndA * 5)
+		rndA, rndB := random.Float32(), random.Float32()
+		imgIndex := int(random.Float32() * 5)
 		imgW, imgH := imgWidths[imgIndex], imgHeights[imgIndex]
 		incX := imgIncX[imgIndex]
 		incY := imgIncY[imgIndex]
 		rectW, rectH := float32(imgW)*scale+wnd.incX*incX, float32(imgH)*scale+wnd.incY*incY
 		rect := wnd.layer0.NewEntity()
-		rect.X, rect.Y, rect.Width, rect.Height = rndB*(clW-rectW-2*padding)+padding, rndC*(clH-rectH-2*padding)+padding, rectW, rectH
+		rect.X, rect.Y, rect.Width, rect.Height = rndA*(clW-rectW-2*padding)+padding, rndB*(clH-rectH-2*padding)+padding, rectW, rectH
+		rect.R, rect.G, rect.B, rect.A = random.Float32(), random.Float32(), random.Float32(), random.Float32()*0.49+0.49
 		rect.TexRef, rect.TexX, rect.TexY, rect.TexWidth, rect.TexHeight = imgIndex, 0, 0, imgW, imgH
 		rect.RotX, rect.RotY = rect.Width/2, rect.Height/2
 		if random.Float32() < 0.5 {
@@ -295,10 +345,14 @@ func (wnd *demoWindow) spawn(n int) {
 		}
 		wnd.entities = append(wnd.entities, rect)
 		wnd.entImgIdxs = append(wnd.entImgIdxs, imgIndex)
-		wnd.rotSpeed = append(wnd.rotSpeed, rndD*0.25-0.125)
+		wnd.rotSpeed = append(wnd.rotSpeed, random.Float32()*0.25-0.125)
+		if wnd.showRects {
+			rect.TexRef = -1
+		}
 	}
 	wnd.counter += n
-	if firstUpdate {
+	if wnd.entFirstMov {
+		wnd.Stats.FPS, wnd.Stats.UPS = 0, 0
 		wnd.Update()
 	}
 }

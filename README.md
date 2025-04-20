@@ -5,10 +5,12 @@
 ## About
 g2d-demo is a graphic application that uses g2d framework to test and to demonstrate basic idea of using g2d. It is published on <https://github.com/vbsw/g2d-demo>.
 
-## Compilation
-To compile you need Go (<https://go.dev/doc/install>) and a C compiler (e.g. <https://jmeubank.github.io/tdm-gcc/>).
+## Compile
+Install Go (<https://golang.org/doc/install>). For Cgo install a C compiler (<https://jmeubank.github.io/tdm-gcc/>).
 
-On Windows to compile without console use:
+For Windows:
+To compile an executable that doesn't open a console, use
+
 	-ldflags -H=windowsgui
 
 ## Controls
@@ -19,14 +21,15 @@ On Windows to compile without console use:
 	o         set original size
 	r         toggle rotation
 	m         toggle movement
-	j         toggle mipmaps
+	j         switch between no, auto and custom mipmaps
 	v         toggle vsync
-	p         toggle picture-in-picture (offscreen buffer, only)
-	b         toggle offscreen buffer
+	b         toggle window borders on/off
+	d         toggle window dragable on/off
 	t         toggle anti-aliasing (offscreen buffer, only)
 	i         print stats (UPS, FPS, ...)
 	c         clear screen
 	f         fullscreen
+	h         show new window
 
 ## Copyright
 See file COPYRIGHT.
