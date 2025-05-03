@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"github.com/vbsw/g2d"
+	"github.com/vbsw/keycode"
 )
 
 type demoWindow struct {
@@ -151,18 +152,18 @@ func (wnd *demoWindow) OnResize() error {
 	return nil
 }
 
-func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
-	if keyCode == 14 { // K
+func (wnd *demoWindow) OnKeyDown(key int, repeated uint) error {
+	if key == keycode.K {
 		for i := range wnd.entities {
 			wnd.movX[i] /= 1.1
 			wnd.movY[i] /= 1.1
 		}
-	} else if keyCode == 15 { // L
+	} else if key == keycode.L {
 		for i := range wnd.entities {
 			wnd.movX[i] *= 1.1
 			wnd.movY[i] *= 1.1
 		}
-	} else if keyCode == 20 { // Q
+	} else if key == keycode.Q {
 		wnd.incX -= 1
 		wnd.incY -= 1
 		for i, rect := range wnd.entities {
@@ -174,7 +175,7 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 			rect.RotX -= incX / 2.0
 			rect.RotY -= incY / 2.0
 		}
-	} else if keyCode == 26 { // W
+	} else if key == keycode.W {
 		wnd.incX += 1
 		wnd.incY += 1
 		for i, rect := range wnd.entities {
@@ -186,22 +187,22 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 			rect.RotX += incX / 2.0
 			rect.RotY += incY / 2.0
 		}
-	} else if keyCode == 30 { // 1
+	} else if key == keycode.One {
 		wnd.spawn(1)
-	} else if keyCode == 31 { // 2
+	} else if key == keycode.Two {
 		wnd.spawn(10)
-	} else if keyCode == 32 { // 3
+	} else if key == keycode.Three {
 		wnd.spawn(100)
-	} else if keyCode == 33 { // 4
+	} else if key == keycode.Four {
 		wnd.spawn(1000)
-	} else if keyCode == 34 { // 5
+	} else if key == keycode.Five {
 		wnd.spawn(10000)
 	} else if repeated == 0 {
-		if keyCode == 5 { // B
+		if key == keycode.B {
 			wnd.Props.Borderless = !wnd.Props.Borderless
-		} else if keyCode == 7 { // D
+		} else if key == keycode.D {
 			wnd.Props.Dragable = !wnd.Props.Dragable
-		} else if keyCode == 4 { // A
+		} else if key == keycode.A {
 			scale /= 2
 			for i, rect := range wnd.entities {
 				imgIndex := wnd.entImgIdxs[i]
@@ -210,7 +211,7 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 				rect.RotX = rect.Width / 2
 				rect.RotY = rect.Height / 2
 			}
-		} else if keyCode == 22 { // S
+		} else if key == keycode.S {
 			scale *= 2
 			for i, rect := range wnd.entities {
 				imgIndex := wnd.entImgIdxs[i]
@@ -219,7 +220,7 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 				rect.RotX = rect.Width / 2
 				rect.RotY = rect.Height / 2
 			}
-		} else if keyCode == 6 { // C
+		} else if key == keycode.C {
 			for _, rect := range wnd.entities {
 				wnd.layer0.Release(rect)
 			}
@@ -230,9 +231,9 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 			wnd.movY = wnd.movY[:0]
 			wnd.counter = 0
 			wnd.Stats.FPS, wnd.Stats.UPS = 0, 0
-		} else if keyCode == 9 { // F
+		} else if key == keycode.F {
 			wnd.Props.Fullscreen = !wnd.Props.Fullscreen
-		} else if keyCode == 10 { // G
+		} else if key == keycode.G {
 			wnd.showRects = !wnd.showRects
 			if wnd.showRects {
 				for _, rect := range wnd.entities {
@@ -243,9 +244,9 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 					rect.TexRef = wnd.entImgIdxs[i]
 				}
 			}
-		} else if keyCode == 11 { // H
+		} else if key == keycode.N {
 			wnd.Show(newDemoWindow())
-		} else if keyCode == 12 { // I
+		} else if key == keycode.I {
 			if wnd.shiftDown {
 				fmt.Println("")
 				fmt.Println("------ Video Card ------")
@@ -272,18 +273,18 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 				fmt.Println(fmt.Sprintf("%-4d   %-7d   %-8d", wnd.Stats.FPS, wnd.Stats.UPS, wnd.counter))
 				infoCount++
 			}
-		} else if keyCode == 13 { // J
+		} else if key == keycode.J {
 			texCount := len(imgNames)
 			wnd.mipMapOn = (wnd.mipMapOn + 1) % 3
 			texOffset := texCount * wnd.mipMapOn
 			for i := 0; i < texCount; i++ {
 				wnd.layer0.UseTexture(i, i+texOffset)
 			}
-		} else if keyCode == 16 { // M
+		} else if key == keycode.M {
 			if len(wnd.entities) > 0 {
 				wnd.moving = !wnd.moving
 			}
-		} else if keyCode == 18 { // O
+		} else if key == keycode.O {
 			scale = 0.125
 			wnd.incX = 0
 			wnd.incY = 0
@@ -294,25 +295,25 @@ func (wnd *demoWindow) OnKeyDown(keyCode int, repeated uint) error {
 				rect.RotX = rect.Width / 2
 				rect.RotY = rect.Height / 2
 			}
-		} else if keyCode == 21 { // R
+		} else if key == keycode.R {
 			if len(wnd.entities) > 0 {
 				wnd.rotating = !wnd.rotating
 			}
-		} else if keyCode == 25 { // V
+		} else if key == keycode.V {
 			wnd.Gfx.VSync = !wnd.Gfx.VSync
-		} else if keyCode == 41 { // ESC
+		} else if key == keycode.Escape {
 			wnd.Close()
-		} else if keyCode == 225 { // SHIFT
+		} else if key == keycode.LeftShift {
 			wnd.shiftDown = true
 		} else {
-			println("key", keyCode)
+			println("key", key)
 		}
 	}
 	return nil
 }
 
-func (wnd *demoWindow) OnKeyUp(keyCode int) error {
-	if keyCode == 225 { // SHIFT
+func (wnd *demoWindow) OnKeyUp(key int) error {
+	if key == keycode.LeftShift {
 		wnd.shiftDown = false
 	}
 	return nil

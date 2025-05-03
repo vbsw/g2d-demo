@@ -78,7 +78,7 @@ func printUsage() {
 	fmt.Println("  i         print stats (UPS, FPS, ...)")
 	fmt.Println("  c         clear screen")
 	fmt.Println("  f         fullscreen")
-	fmt.Println("  h         show new window")
+	fmt.Println("  n         show new window")
 }
 
 func main() {

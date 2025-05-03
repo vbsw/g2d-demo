@@ -29,7 +29,7 @@ To compile an executable that doesn't open a console, use
 	i         print stats (UPS, FPS, ...)
 	c         clear screen
 	f         fullscreen
-	h         show new window
+	n         show new window
 
 ## Copyright
 See file COPYRIGHT.

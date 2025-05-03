@@ -1,2 +1,4 @@
 github.com/vbsw/g2d v0.0.0-20250420194617-57b02e3baf56 h1:Uk0SBEqBvop6pwkh0x6hyLe3aVTmKmTdllUHhjTmHa0=
 github.com/vbsw/g2d v0.0.0-20250420194617-57b02e3baf56/go.mod h1:ogb98OQ6HmjJPOyV1rjYoJUccleI9CLMNeTZLQnCHkY=
+github.com/vbsw/keycode v0.2.0 h1:CF0/e8aBqDgOdrapNZWAa5R0+S5nb2cICL6BjxhBoYk=
+github.com/vbsw/keycode v0.2.0/go.mod h1:BgqDQt0+5NBcH9LSfuhuM5X4+5RKU/uPHxU5oTzuUaY=
